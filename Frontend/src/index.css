@@ -1,0 +1,162 @@
+:root {
+  /* --- VARIABLES GENERALES (DEFAULT: MODO OSCURO) --- */
+  --color-text: rgba(255, 255, 255, 0.87);
+  --color-background: #242424;
+  --color-background-soft: #1a1a1a;
+  
+  /* --- PALETA DE ACCIÓN --- */
+  --color-primary: #646cff; /* Principal de acento/botón */
+  --color-primary-hover: #535bf2; /* Acento hover */
+  --color-success: #10b981; /* Éxito/Aprobado */
+  --color-error: #ef4444; /* Error/Advertencia */
+  --color-warning: #f59e0b; /* Advertencia/Pendiente */
+
+  /* --- BORDES Y SOMBRAS --- */
+  --color-border: #383838; /* Borde gris oscuro */
+  --color-border-transparent: transparent;
+  --color-shadow: rgba(0, 0, 0, 0.4);
+
+  /* --- TIPOGRAFÍA Y ESPACIO --- */
+  --font-family-base: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  --border-radius-base: 8px;
+
+  /* Aplicar variables */
+  font-family: var(--font-family-base);
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: var(--color-text);
+  background-color: var(--color-background); /* Fondo aplicado al elemento raíz */
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* * FIX RESPONSIVE:
+ * La clave: Forzar la altura al 100% y aplicar el color de fondo también al HTML.
+ */
+html {
+  height: 100%;
+  background-color: var(--color-background); /* ¡Añadido para cobertura total! */
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh; /* Asegura que el body ocupe al menos la altura visible */
+  background-color: var(--color-background); /* Asegura que el body tenga el fondo correcto */
+  line-height: 1.5;
+}
+
+#app {
+  max-width: 1280px;
+  margin: 0 auto;
+  width: 100%;
+  /* Mejorar el padding para móviles: 1rem arriba/abajo, 1.5rem laterales */
+  padding: 1rem 1.5rem;
+  box-sizing: border-box;
+}
+
+a {
+  font-weight: 500;
+  color: var(--color-primary);
+  text-decoration: inherit;
+}
+
+a:hover {
+  color: var(--color-primary-hover);
+}
+
+/* ----------------------------------- */
+/* 1. TIPOGRAFÍA Y ENCABEZADOS MEJORADOS */
+/* ----------------------------------- */
+
+h1,
+h2,
+h3,
+h4 {
+  color: var(--color-text);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+  margin-top: 0;
+  margin-bottom: 0.5em;
+}
+
+/* ----------------------------------- */
+/* 2. BOTONES MEJORADOS (UX y PALETA) */
+/* ----------------------------------- */
+
+button {
+  border-radius: var(--border-radius-base);
+  border: 1px solid var(--color-border-transparent);
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 600;
+  font-family: inherit;
+  background-color: var(--color-background-soft);
+  cursor: pointer;
+  transition: all 0.25s;
+  box-shadow: 0 2px 4px var(--color-shadow);
+}
+
+button:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+button:focus,
+button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-primary-hover), 0 2px 4px var(--color-shadow);
+}
+
+/* ----------------------------------- */
+/* 3. RESPONSIVE Y MODO CLARO/OSCURO */
+/* ----------------------------------- */
+
+@media (prefers-color-scheme: light) {
+  /* --- SOBREESCRIBIR VARIABLES PARA MODO CLARO --- */
+  :root,
+  body,
+  html /* Aseguramos que el HTML también se actualice en modo claro */
+  {
+    --color-text: #213547;
+    --color-background: #ffffff;
+    --color-background-soft: #f9f9f9;
+    
+    /* Ajustes en la paleta */
+    --color-primary: #4c5bff;
+    --color-primary-hover: #747bff;
+    --color-border: #e0e0e0;
+    --color-shadow: rgba(0, 0, 0, 0.1);
+    
+    color: var(--color-text);
+    background-color: var(--color-background);
+  }
+}
+
+/* Ajuste de padding en desktop (más espacio en pantallas grandes) */
+@media (min-width: 768px) {
+  #app {
+    padding: 2rem;
+  }
+}
+
+/* Reducir tamaño de títulos en móviles */
+@media (max-width: 600px) {
+  h1 {
+    font-size: 2.5em;
+  }
+}

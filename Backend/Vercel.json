@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "src/main.ts", // ¡Verifiquen que esta sea la ruta a su archivo de entrada!
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)", // Redirigir todas las rutas...
+      "dest": "src/main.ts" // ...hacia la función serverless de NestJS
+    }
+  ]
+}
