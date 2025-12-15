@@ -6,14 +6,14 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import { NoticiasModule } from './noticias/noticias.module';
 import { LocalidadesModule } from './localidades/localidades.module';
-import { ClubesModule } from './clubes/clubes.module';
 import { AuthModule } from './auth/auth.module';
+import { ClubesModule } from './clubes/clubes.module';
 import { ReferenteModule } from './referente/referente.module';
 import { JugadorModule } from './jugador/jugador.module';
 import { EncuentroModule } from './encuentro/encuentro.module';
 import { FixtureModule } from './fixture/fixture.module';
 import { PagoModule } from './pago/pago.module';
-import { SeedModule } from './seed/seed.module'; // <--- 1. IMPORTAR ESTO
+import { MailModule } from './mail/mail.module';
 
 @Module({
     imports: [
@@ -35,12 +35,12 @@ import { SeedModule } from './seed/seed.module'; // <--- 1. IMPORTAR ESTO
         LocalidadesModule,
         ClubesModule,
         AuthModule,
+        MailModule,
         ReferenteModule,
         JugadorModule,
         EncuentroModule,
         FixtureModule,
         PagoModule,
-        SeedModule, // <--- 2. AGREGAR ESTO AL ARRAY
     ],
 })
 export class AppModule { }

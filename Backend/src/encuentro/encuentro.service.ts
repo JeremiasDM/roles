@@ -1,7 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateEncuentroDto } from './dto/create-encuentro.dto';
 import { Encuentro } from './entities/encuentro.entity';
 
 @Injectable()
@@ -11,14 +10,43 @@ export class EncuentroService {
     private readonly encuentroRepository: Repository<Encuentro>,
   ) {}
 
-  // Métodos básicos (findAll, findOne, update, remove)
-  // Probablemente no necesites un 'create' público aquí,
-  // ya que los encuentros se crearán junto con el fixture.
-
-  findAllByFixture(fixtureId: number): Promise<Encuentro[]> {
+  // Buscar todos por ID de Fixture
+  async findAllByFixture(fixtureId: number): Promise<Encuentro[]> {
     return this.encuentroRepository.find({
-        where: { fixtureId },
-        relations: ['club1', 'club2'] // Cargar clubes relacionados
+      // Aseguramos que la consulta use la relación correcta
+      where: { fixture: { id: fixtureId } }, 
+      relations: ['club1', 'club2']
     });
+  }
+
+  // Buscar uno por ID (Necesario para validar antes de actualizar)
+  async findOne(id: number): Promise<Encuentro> {
+    const encuentro = await this.encuentroRepository.findOne({ 
+      where: { id },
+      relations: ['club1', 'club2']
+    });
+    if (!encuentro) {
+      throw new NotFoundException(`Encuentro con ID ${id} no encontrado`);
+    }
+    return encuentro;
+  }
+
+  // --- MÉTODO FALTANTE QUE CAUSABA EL ERROR ---
+  async update(id: number, data: any) {
+    // 1. Buscamos si existe
+    const encuentro = await this.findOne(id);
+
+    // 2. Combinamos los datos nuevos con los existentes
+    // Esto permite actualizar solo el resultado sin borrar lo demás
+    this.encuentroRepository.merge(encuentro, data);
+
+    // 3. Guardamos
+    return this.encuentroRepository.save(encuentro);
+  }
+
+  // Eliminar (Opcional, pero útil tenerlo)
+  async remove(id: number) {
+    const encuentro = await this.findOne(id);
+    return this.encuentroRepository.remove(encuentro);
   }
 }

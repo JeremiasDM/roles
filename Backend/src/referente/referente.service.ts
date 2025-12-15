@@ -1,15 +1,19 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Referente } from './entities/referente.entity';
 import { CreateReferenteDto } from './dto/create-referente.dto';
 import { UpdateReferenteDto } from './dto/update-referente.dto';
+import { MailService } from '../mail/mail.service'; // <--- 1. IMPORTAR
 
 @Injectable()
 export class ReferenteService {
+  private readonly logger = new Logger(ReferenteService.name);
+
   constructor(
     @InjectRepository(Referente)
     private referenteRepository: Repository<Referente>,
+    private mailService: MailService, // <--- 2. INYECTAR
   ) {}
 
   // --- Generador de Contraseña Aleatoria ---
@@ -22,7 +26,7 @@ export class ReferenteService {
     return retVal;
   }
 
-  // --- CREAR (Registro + Generación de Password) ---
+  // --- CREAR (Registro + Generación de Password + Email) ---
   async create(createReferenteDto: CreateReferenteDto) {
     // 1. Validar unicidad del correo
     const existing = await this.referenteRepository.findOne({ 
@@ -35,7 +39,7 @@ export class ReferenteService {
     // 2. Generar contraseña temporal
     const tempPassword = this.generateRandomPassword(10);
 
-    // 3. Crear instancia (el hash ocurre automáticamente en la Entidad)
+    // 3. Crear instancia (el hash ocurre automáticamente en la Entidad con @BeforeInsert)
     const nuevoReferente = this.referenteRepository.create({
       ...createReferenteDto,
       password: tempPassword, 
@@ -44,11 +48,25 @@ export class ReferenteService {
     // 4. Guardar en BD
     await this.referenteRepository.save(nuevoReferente);
 
-    // 5. Retornar datos + contraseña plana (SOLO para mostrarla ahora)
+    // 5. ENVIAR CORREO
+    try {
+      await this.mailService.enviarCredenciales(
+        nuevoReferente.correo,
+        tempPassword,
+        nuevoReferente.nombre
+      );
+      this.logger.log(`Correo de credenciales enviado a ${nuevoReferente.correo}`);
+    } catch (error) {
+      this.logger.error(`Error enviando correo a ${nuevoReferente.correo}: ${error}`);
+      // No lanzamos error para no revertir la creación del usuario,
+      // la contraseña sigue siendo visible en la respuesta JSON como respaldo.
+    }
+
+    // 6. Retornar datos + contraseña plana (Respaldo visual para el admin)
     return {
-      message: 'Referente creado y usuario generado exitosamente.',
+      message: 'Referente creado. Se ha intentado enviar las credenciales por correo.',
       usuario: nuevoReferente.correo,
-      tempPassword: tempPassword, // <--- MUESTRA ESTO AL ADMIN
+      tempPassword: tempPassword, 
       referente: {
         id: nuevoReferente.id,
         nombre: nuevoReferente.nombre,
@@ -90,10 +108,10 @@ export class ReferenteService {
   // --- Métodos Específicos de AUTH ---
 
   // Busca usuario y TRAE el password (necesario para validar login)
-async findOneByEmailForAuth(correo: string): Promise<Referente | null> {
+  async findOneByEmailForAuth(correo: string): Promise<Referente | null> {
     return this.referenteRepository.findOne({ 
       where: { correo },
-      // AGREGAR 'rol' AL SELECT
+      // Importante: Incluir 'rol' para que funcione el sistema de permisos
       select: ['id', 'correo', 'password', 'nombre', 'apellido', 'clubId', 'rol'] 
     });
   }
@@ -103,7 +121,7 @@ async findOneByEmailForAuth(correo: string): Promise<Referente | null> {
     const referente = await this.referenteRepository.findOneBy({ id });
     if (!referente) throw new NotFoundException('Usuario no encontrado');
 
-    referente.password = newPass; // La entidad lo hasheará
+    referente.password = newPass; // La entidad lo hasheará automáticamente
     await this.referenteRepository.save(referente);
     
     return { message: 'Contraseña actualizada correctamente.' };

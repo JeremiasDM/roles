@@ -1,10 +1,11 @@
+// src/auth/jwt.strategy.ts
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
-import { jwtConstants } from './constants'; // Asegúrate de tener este archivo con tu 'secret'
+import { jwtConstants } from './constants';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
+export class JwtStrategy extends PassportStrategy(Strategy) { // Por defecto usa el nombre 'jwt'
   constructor() {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -14,12 +15,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-    // Esto inyecta el usuario en 'request.user' para que el RolesGuard lo lea
+    // Esto inyecta los datos del usuario en request.user
     return { 
-      userId: payload.sub, 
-      username: payload.username, 
-      rol: payload.rol, // Importante: el payload debe traer el rol (ver auth.service.ts)
-      clubId: payload.clubId 
+        userId: payload.sub, 
+        username: payload.username, 
+        rol: payload.rol,
+        clubId: payload.clubId 
     };
   }
 }
